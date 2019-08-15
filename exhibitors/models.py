@@ -16,145 +16,186 @@ def get_random_32_length_string():
 
 
 class CatalogueIndustry(models.Model):
-	industry = models.CharField(blank = False, max_length = 255)
-	def __str__(self): return self.industry
-	class Meta: default_permissions = []
+    industry = models.CharField(blank = False, max_length = 255)
+    category = models.ForeignKey('CatalogueCategory', blank = True, null = True, on_delete=models.CASCADE)
+    include_in_form = models.BooleanField(default = True)
+    include_in_form.help_text = "The alternative is only visible in forms if this attribute is checked."
+    def __str__(self): return self.industry
+    class Meta:
+        verbose_name_plural = 'Catalogue industries'
+        default_permissions = []
+        ordering = ['category', 'industry']
 
 
 class CatalogueValue(models.Model):
-	value = models.CharField(blank = False, max_length = 255)
-	def __str__(self): return self.value
-	class Meta: default_permissions = []
+    value = models.CharField(blank = False, max_length = 255)
+    include_in_form = models.BooleanField(default = True)
+    include_in_form.help_text = "The alternative is only visible in forms if this attribute is checked."
+    def __str__(self): return self.value
+    class Meta:
+        default_permissions = []
+        ordering = ['value']
 
 
 class CatalogueEmployment(models.Model):
-	employment = models.CharField(blank = False, max_length = 255)
-	def __str__(self): return self.employment
-	class Meta: default_permissions = []
+    employment = models.CharField(blank = False, max_length = 255)
+    include_in_form = models.BooleanField(default = True)
+    include_in_form.help_text = "The alternative is only visible in forms if this attribute is checked."
+    def __str__(self): return self.employment
+    class Meta:
+        default_permissions = []
+        ordering = ['employment']
 
 
 class CatalogueLocation(models.Model):
-	location = models.CharField(blank = False, max_length = 255)
-	def __str__(self): return self.location
-	class Meta: default_permissions = []
-
+    location = models.CharField(blank = False, max_length = 255)
+    include_in_form = models.BooleanField(default = True)
+    include_in_form.help_text = "The alternative is only visible in forms if this attribute is checked."
+    def __str__(self): return self.location
+    class Meta:
+        default_permissions = []
+        ordering = ['location']
 
 class CatalogueBenefit(models.Model):
-	benefit = models.CharField(blank = False, max_length = 255)
-	def __str__(self): return self.benefit
-	class Meta: default_permissions = []
+    benefit = models.CharField(blank = False, max_length = 255)
+    include_in_form = models.BooleanField(default = True)
+    include_in_form.help_text = "The alternative is only visible in forms if this attribute is checked."
+    def __str__(self): return self.benefit
+    class Meta:
+        default_permissions = []
+        ordering = ['benefit']
+
+class CatalogueCompetence(models.Model):
+    competence = models.CharField(blank = False, max_length = 255)
+    category = models.ForeignKey('CatalogueCategory', blank = True, null = True, on_delete=models.CASCADE)
+    include_in_form = models.BooleanField(default = True)
+    include_in_form.help_text = "The alternative is only visible in forms if this attribute is checked."
+    def __str__(self): return self.competence
+    class Meta:
+        default_permissions = []
+        ordering = ['category', 'competence']
+
+class CatalogueCategory(models.Model):
+    category = models.CharField(blank = False, max_length = 255)
+    def __str__(self): return self.category
+    class Meta:
+        verbose_name_plural = 'Catalogue categories'
+        default_permissions = []
+        ordering = ['category']
 
 
 # A company (or organisation) participating in a fair
 class Exhibitor(models.Model):
-	company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
-	fair = models.ForeignKey('fair.Fair', on_delete=models.CASCADE)
-	contact_persons = models.ManyToManyField(User, blank = True)
-	contact = models.ForeignKey('companies.CompanyContact', null = True, blank = True, on_delete = models.CASCADE)
-	booth_height = models.PositiveIntegerField(blank = True, null = True, verbose_name = 'Height of the booth (cm)')
-	electricity_total_power = models.PositiveIntegerField(blank = True, null = True, verbose_name = 'Estimated power consumption (W)')
-	electricity_socket_count = models.PositiveIntegerField(blank = True, null = True, verbose_name = 'Number of sockets')
-	electricity_equipment = models.TextField(blank = True, null = True, verbose_name = 'Description of equipment')
-	check_in_timestamp = models.DateTimeField(blank = True, null = True)
-	check_in_comment = models.TextField(blank = True, null = True)
-	check_in_user = models.ForeignKey(User, blank = True, null = True, related_name = 'check_in_user')
-	catalogue_about = models.TextField(blank = True, null = True, max_length = 600)
-	catalogue_purpose = models.TextField(blank = True, null = True, max_length = 600)
-	catalogue_logo_squared = models.ImageField(upload_to = UploadToDirUUID('exhibitors', 'catalogue_logo_squared'), blank = True)
-	catalogue_logo_freesize = models.ImageField(upload_to = UploadToDirUUID('exhibitors', 'catalogue_logo_freesize'), blank = True)
-	catalogue_contact_name = models.CharField(blank = True, null = True, max_length = 255, verbose_name = 'Contact person\'s name')
-	catalogue_contact_email_address = models.CharField(blank = True, null = True, max_length = 255, verbose_name = 'Contact person\'s e-mail address')
-	catalogue_contact_phone_number = models.CharField(blank = True, null = True, max_length = 255, verbose_name = 'Contact person\'s phone number')
-	catalogue_industries = models.ManyToManyField(CatalogueIndustry, blank = True)
-	catalogue_values = models.ManyToManyField(CatalogueValue, blank = True)
-	catalogue_employments = models.ManyToManyField(CatalogueEmployment, blank = True)
-	catalogue_locations = models.ManyToManyField(CatalogueLocation, blank = True)
-	catalogue_benefits = models.ManyToManyField(CatalogueBenefit, blank = True)
-	catalogue_average_age = models.PositiveIntegerField(blank = True, null = True, verbose_name = 'Average age of employees')
-	catalogue_founded = models.PositiveIntegerField(blank = True, null = True)
-	
-	deadline_complete_registration = models.DateTimeField(blank = True, null = True, verbose_name = 'Deviating deadline for complete registration')
-	
-	placement_wishes = [
-		('MIXED', 'Mixed with companies from other industries'),
-		('SIMILAR', 'Next to similar companies'),
-	]
-	
-	placement_wish = models.CharField(choices = placement_wishes, blank = True, null = True, max_length = 255)
-	placement_comment = models.TextField(blank = True, null = True, verbose_name = 'Additional wishes regarding placement at the fair')
-	
-	transport_to_statuses = [
-		('NOT_BOOKED', 'Not booked'),
-		('BOOKED', 'Booked'),
-		('ARKAD', 'Transported by Arkad'),
-		('NOT_APPLICABLE', 'Not applicable'),
-		('EXCEPTION', 'Exception'),
-		('IN_CONTACT', 'In contact'),
-		('IN_CONTACT_ARMADA', 'In contact by Armada'),
-		('STURE', 'Sture')
-	]
-	
-	transport_to = models.CharField(choices = transport_to_statuses, null = False, blank = False, default = 'NOT_BOOKED', max_length = 30)
-	
-	transport_from_statuses = [
-		('NOT_BOOKED', 'Not booked'),
-		('BOOKED', 'Booked'),
-		('NOT_APPLICABLE', 'Not applicable'),
-		('EXCEPTION', 'Exception'),
-		('IN_CONTACT', 'In contact'),
-		('STURE', 'Sture')
-	]
-	
-	transport_from = models.CharField(choices = transport_from_statuses, null = False, blank = False, default = 'NOT_BOOKED', max_length = 30)
-	transport_comment = models.TextField(blank = True, null = True)
-	
-	@property
-	def count_lunch_tickets(self):
-		count_ordered = 0
-		
-		for order in Order.objects.filter(purchasing_company = self.company, product = self.fair.product_lunch_ticket):
-			count_ordered += order.quantity
-		
-		count_created = LunchTicket.objects.filter(company = self.company).count()
-		
-		return {
-			'ordered': count_ordered,
-			'created': count_created
-		}
-	
-	@property
-	def count_banquet_tickets(self):
-		count_ordered = 0
-		count_created = 0
-		
-		for banquet in Banquet.objects.filter(fair = self.fair):
-			if banquet.product is not None:
-				for order in Order.objects.filter(purchasing_company = self.company, product = banquet.product):
-					count_ordered += order.quantity
-			
-			count_created += Participant.objects.filter(banquet = banquet, company = self.company).count()
-		
-		return {
-			'ordered': count_ordered,
-			'created': count_created
-		}
-	
-	def __str__(self): return '%s at %s' % (self.company.name, self.fair.name)
-	
-	class Meta:
-		default_permissions = []
-		ordering = ['company__name']
-		permissions = [
-			('base', 'View the Exhibitors tab'),
-			('view_all', 'Always view all exhibitors'),
-			('create', 'Create new exhibitors'),
-			('modify_contact_persons', 'Modify contact persons'),
-			('modify_transport', 'Modify transport details'),
-			('modify_check_in', 'Modify check in'),
-			('modify_details', 'Modify details'),
-			('modify_booths', 'Modify booths'),
-			('people_count', 'Count people in locations')
-		]
+    company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
+    fair = models.ForeignKey('fair.Fair', on_delete=models.CASCADE)
+    contact_persons = models.ManyToManyField(User, blank = True)
+    contact = models.ForeignKey('companies.CompanyContact', null = True, blank = True, on_delete = models.CASCADE)
+    booth_height = models.PositiveIntegerField(blank = True, null = True, verbose_name = 'Height of the booth (cm)')
+    electricity_total_power = models.PositiveIntegerField(blank = True, null = True, verbose_name = 'Estimated power consumption (W)')
+    electricity_socket_count = models.PositiveIntegerField(blank = True, null = True, verbose_name = 'Number of sockets')
+    electricity_equipment = models.TextField(blank = True, null = True, verbose_name = 'Description of equipment')
+    check_in_timestamp = models.DateTimeField(blank = True, null = True)
+    check_in_comment = models.TextField(blank = True, null = True)
+    check_in_user = models.ForeignKey(User, blank = True, null = True, related_name = 'check_in_user')
+    catalogue_about = models.TextField(blank = True, null = True, max_length = 600)
+    catalogue_purpose = models.TextField(blank = True, null = True, max_length = 600)
+    catalogue_logo_squared = models.ImageField(upload_to = UploadToDirUUID('exhibitors', 'catalogue_logo_squared'), blank = True)
+    catalogue_logo_freesize = models.ImageField(upload_to = UploadToDirUUID('exhibitors', 'catalogue_logo_freesize'), blank = True)
+    catalogue_contact_name = models.CharField(blank = True, null = True, max_length = 255, verbose_name = 'Contact person\'s name')
+    catalogue_contact_email_address = models.CharField(blank = True, null = True, max_length = 255, verbose_name = 'Contact person\'s e-mail address')
+    catalogue_contact_phone_number = models.CharField(blank = True, null = True, max_length = 255, verbose_name = 'Contact person\'s phone number')
+    catalogue_industries = models.ManyToManyField(CatalogueIndustry, blank = True)
+    catalogue_values = models.ManyToManyField(CatalogueValue, blank = True)
+    catalogue_employments = models.ManyToManyField(CatalogueEmployment, blank = True)
+    catalogue_benefits = models.ManyToManyField(CatalogueBenefit, blank = True)
+    catalogue_competences = models.ManyToManyField(CatalogueCompetence, blank = True)
+    catalogue_locations = models.ManyToManyField(CatalogueLocation, blank = True)
+    catalogue_cities = models.TextField(blank = True, null = True, max_length = 400)
+    catalogue_average_age = models.PositiveIntegerField(blank = True, null = True, verbose_name = 'Average age of employees')
+    catalogue_founded = models.PositiveIntegerField(blank = True, null = True)
+
+    deadline_complete_registration = models.DateTimeField(blank = True, null = True, verbose_name = 'Deviating deadline for complete registration')
+
+    placement_wishes = [
+        ('MIXED', 'Mixed with companies from other industries'),
+        ('SIMILAR', 'Next to similar companies'),
+    ]
+
+    placement_wish = models.CharField(choices = placement_wishes, blank = True, null = True, max_length = 255)
+    placement_comment = models.TextField(blank = True, null = True, verbose_name = 'Additional wishes regarding placement at the fair')
+
+    transport_to_statuses = [
+    	('NOT_BOOKED', 'Not booked'),
+    	('BOOKED', 'Booked'),
+    	('ARKAD', 'Transported by Arkad'),
+    	('NOT_APPLICABLE', 'Not applicable'),
+    	('EXCEPTION', 'Exception'),
+    	('IN_CONTACT', 'In contact'),
+    	('IN_CONTACT_ARMADA', 'In contact by Armada'),
+    	('STURE', 'Sture')
+    ]
+
+    transport_to = models.CharField(choices = transport_to_statuses, null = False, blank = False, default = 'NOT_BOOKED', max_length = 30)
+
+    transport_from_statuses = [
+    	('NOT_BOOKED', 'Not booked'),
+    	('BOOKED', 'Booked'),
+    	('NOT_APPLICABLE', 'Not applicable'),
+    	('EXCEPTION', 'Exception'),
+    	('IN_CONTACT', 'In contact'),
+    	('STURE', 'Sture')
+    ]
+
+    transport_from = models.CharField(choices = transport_from_statuses, null = False, blank = False, default = 'NOT_BOOKED', max_length = 30)
+    transport_comment = models.TextField(blank = True, null = True)
+
+    @property
+    def count_lunch_tickets(self):
+    	count_ordered = 0
+
+    	for order in Order.objects.filter(purchasing_company = self.company, product = self.fair.product_lunch_ticket):
+    		count_ordered += order.quantity
+
+    	count_created = LunchTicket.objects.filter(company = self.company).count()
+
+    	return {
+    		'ordered': count_ordered,
+    		'created': count_created
+    	}
+
+    @property
+    def count_banquet_tickets(self):
+    	count_ordered = 0
+    	count_created = 0
+
+    	for banquet in Banquet.objects.filter(fair = self.fair):
+    		if banquet.product is not None:
+    			for order in Order.objects.filter(purchasing_company = self.company, product = banquet.product):
+    				count_ordered += order.quantity
+
+    		count_created += Participant.objects.filter(banquet = banquet, company = self.company).count()
+
+    	return {
+    		'ordered': count_ordered,
+    		'created': count_created
+    	}
+
+    def __str__(self): return '%s at %s' % (self.company.name, self.fair.name)
+
+    class Meta:
+    	default_permissions = []
+    	ordering = ['company__name']
+    	permissions = [
+    		('base', 'View the Exhibitors tab'),
+    		('view_all', 'Always view all exhibitors'),
+    		('create', 'Create new exhibitors'),
+    		('modify_contact_persons', 'Modify contact persons'),
+    		('modify_transport', 'Modify transport details'),
+    		('modify_check_in', 'Modify check in'),
+    		('modify_details', 'Modify details'),
+    		('modify_booths', 'Modify booths'),
+    		('people_count', 'Count people in locations')
+    	]
 
 
 class ExhibitorView(models.Model):
@@ -177,16 +218,16 @@ class ExhibitorView(models.Model):
 		'check_in_timestamp': 'Check in',
 		'booths': 'Booths'
 	}
-	
+
 	user = models.ForeignKey(User, on_delete = models.CASCADE)
 	choices = models.TextField()
 
 	def create(self):
 		self.choices = 'contact_persons transport_from transport_to count_lunch_tickets count_banquet_tickets'
 		self.save()
-		
+
 		return self
-	
+
 	class Meta:
 		default_permissions = []
 
@@ -198,11 +239,11 @@ class Location(models.Model):
 	background = models.ImageField(upload_to = UploadToDirUUID('locations'), null = True, blank = True)
 	people_count_enabled = models.BooleanField(default = False)
 	people_count = models.IntegerField(null = True, blank = True)
-	
+
 	class Meta:
 		ordering = ['fair', 'parent__name', 'name']
 		unique_together = [['fair', 'name']]
-	
+
 	def __str__(self): return ((str(self.parent) + ' -> ') if self.parent else '') + self.name
 
 
@@ -218,11 +259,11 @@ class Booth(models.Model):
 	location = models.ForeignKey(Location, on_delete = models.CASCADE)
 	name = models.CharField(blank = False, null = False, max_length = 255)
 	boundaries = models.PolygonField(blank = True, null = True)
-	
+
 	class Meta:
 		ordering = ['location', 'name']
 		unique_together = [['location', 'name']]
-	
+
 	def __str__(self): return str(self.location) + ' -> ' + self.name
 
 
@@ -231,9 +272,9 @@ class ExhibitorInBooth(models.Model):
 	booth = models.ForeignKey(Booth, on_delete = models.CASCADE)
 	days = models.ManyToManyField(FairDay)
 	comment = models.CharField(max_length = 255, null = True, blank = True)
-	
+
 	class Meta:
 		ordering = ['exhibitor', 'booth']
 		unique_together = [['exhibitor', 'booth']]
-	
+
 	def __str__(self): return str(self.exhibitor) + ' in ' + str(self.booth)
